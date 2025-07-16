@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tap Game</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    #tap-btn {
+      width: 200px;
+      height: 200px;
+      background: #007AFF;
+      border-radius: 50%;
+      margin: 30px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s;
+    }
+    #tap-btn:active {
+      transform: scale(0.95);
+    }
+    .stats {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Tap Game ⚡</h1>
+  <div class="stats">
+    <div>Score: <span id="score">0</span></div>
+    <div>Level: <span id="level">1</span></div>
+  </div>
+  <div id="tap-btn">TAP ME</div>
+  <script src="script.js"></script>
+</body>
+</html>
