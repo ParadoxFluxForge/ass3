@@ -108,7 +108,7 @@ app.post('/api/progress', async (req, res) => {
 });
 
 // Статика для клиента
-app.use(express.static(path.join(__dirname, '../../client')));
+app.use(express.static(path.join(__dirname, '../client')));
 
 // Инициализация БД
 async function initializeDatabase() {
