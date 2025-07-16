@@ -1,42 +1,53 @@
 class TapGame {
   constructor() {
     this.tg = window.Telegram.WebApp;
+    this.initData = this.tg.initData;
+    
+    if (!this.validateInitData()) {
+      this.showError('Please open through Telegram');
+      return;
+    }
+
+    this.initializeGame();
+  }
+
+  validateInitData() {
+    if (!this.tg.initDataUnsafe?.user) {
+      console.error('No user data in initData');
+      return false;
+    }
+    return true;
+  }
+
+  async initializeGame() {
     this.tg.expand();
     this.tg.enableClosingConfirmation();
     
+    this.userId = this.tg.initDataUnsafe.user.id;
     this.score = 0;
     this.level = 1;
-    this.userId = this.tg.initDataUnsafe.user.id;
-    this.isSaving = false;
-    
-    this.init();
-  }
-  
-  async init() {
+    this.pendingSave = false;
+
     await this.loadProgress();
-    this.setupEvents();
+    this.setupEventListeners();
   }
-  
-  setupEvents() {
+
+  setupEventListeners() {
     document.getElementById('tap-btn').addEventListener('click', () => {
       this.handleTap();
     });
-    
-    // Сохранение при закрытии
-    this.tg.onEvent('viewportChanged', (event) => {
-      if (event.isStateStable && this.tg.isClosingConfirmationEnabled) {
-        this.saveProgress(true);
-      }
+
+    window.addEventListener('beforeunload', () => {
+      this.saveProgress(true);
     });
-    
-    // Сохранение каждые 5 секунд
+
     setInterval(() => this.saveProgress(), 5000);
   }
-  
+
   async loadProgress() {
     try {
-      const params = new URLSearchParams({ initData: this.tg.initData });
-      const response = await fetch(`/progress?${params}`);
+      const params = new URLSearchParams({ initData: this.initData });
+      const response = await fetch(`/api/progress?${params}`);
       
       if (!response.ok) throw new Error('Network error');
       
@@ -45,17 +56,17 @@ class TapGame {
       this.level = data.level;
       this.updateUI();
     } catch (err) {
-      console.error('Load progress error:', err);
+      console.error('Load error:', err);
     }
   }
-  
-  async saveProgress(force = false) {
-    if (this.isSaving && !force) return;
+
+  async saveProgress(immediate = false) {
+    if (this.pendingSave && !immediate) return;
     
-    this.isSaving = true;
+    this.pendingSave = true;
     try {
-      const params = new URLSearchParams({ initData: this.tg.initData });
-      const response = await fetch(`/progress?${params}`, {
+      const params = new URLSearchParams({ initData: this.initData });
+      const response = await fetch(`/api/progress?${params}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,53 +77,57 @@ class TapGame {
       
       if (!response.ok) throw new Error('Save failed');
     } catch (err) {
-      console.error('Save progress error:', err);
+      console.error('Save error:', err);
     } finally {
-      this.isSaving = false;
+      this.pendingSave = false;
     }
   }
-  
+
   handleTap() {
     this.score++;
     
-    // Level up
     if (this.score >= this.level * 100) {
-      this.level++;
-      this.score = 0;
-      this.tg.HapticFeedback.notificationOccurred('success');
+      this.levelUp();
     } else {
       this.tg.HapticFeedback.impactOccurred('light');
     }
     
     this.updateUI();
-    
-    // Сохраняем после каждого клика (с дебаунсом)
     this.debouncedSave();
   }
-  
+
+  levelUp() {
+    this.level++;
+    this.score = 0;
+    this.tg.HapticFeedback.notificationOccurred('success');
+    this.tg.showAlert(`Level ${this.level} reached!`);
+  }
+
   updateUI() {
     document.getElementById('score').textContent = this.score;
     document.getElementById('level').textContent = this.level;
   }
-  
-  // Оптимизация: сохраняем не чаще чем раз в секунду
+
+  showError(message) {
+    document.getElementById('tap-btn').disabled = true;
+    alert(message);
+  }
+
   debouncedSave = this.debounce(() => this.saveProgress(), 1000);
-  
+
   debounce(func, wait) {
     let timeout;
     return () => {
       clearTimeout(timeout);
-      timeout = setTimeout(func, wait);
+      timeout = setTimeout(() => func(), wait);
     };
   }
 }
 
-// Запуск игры
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.Telegram.WebApp.initDataUnsafe.user) {
+  if (window.Telegram && window.Telegram.WebApp) {
     new TapGame();
   } else {
-    alert('Откройте игру через Telegram бота');
-    document.getElementById('tap-btn').disabled = true;
+    alert('Please open through Telegram');
   }
 });
