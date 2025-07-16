@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +12,18 @@
       padding: 20px;
       max-width: 500px;
       margin: 0 auto;
+      background-color: #f5f5f5;
+    }
+    .game-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     #tap-btn {
-      width: 200px;
-      height: 200px;
-      background: #007AFF;
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(135deg, #007AFF, #00A8FF);
       border-radius: 50%;
       margin: 30px auto;
       display: flex;
@@ -24,26 +31,37 @@
       justify-content: center;
       color: white;
       font-size: 24px;
+      font-weight: bold;
       cursor: pointer;
       user-select: none;
       transition: transform 0.1s;
+      box-shadow: 0 6px 12px rgba(0,122,255,0.3);
     }
     #tap-btn:active {
       transform: scale(0.95);
     }
     .stats {
-      font-size: 20px;
+      display: flex;
+      justify-content: space-around;
       margin: 20px 0;
+      font-size: 20px;
+    }
+    .stat {
+      background: #f0f0f0;
+      padding: 10px 20px;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>⚡ Tap Game ⚡</h1>
-  <div class="stats">
-    <div>Score: <span id="score">0</span></div>
-    <div>Level: <span id="level">1</span></div>
+  <div class="game-container">
+    <h1>⚡ Tap Game ⚡</h1>
+    <div class="stats">
+      <div class="stat">Score: <span id="score">0</span></div>
+      <div class="stat">Level: <span id="level">1</span></div>
+    </div>
+    <div id="tap-btn">TAP ME</div>
   </div>
-  <div id="tap-btn">TAP ME</div>
   <script src="script.js"></script>
 </body>
 </html>
